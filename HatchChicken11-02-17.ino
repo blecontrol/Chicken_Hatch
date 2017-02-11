@@ -41,11 +41,16 @@ DHT dht; //สร้างออปเจค DHT22 สำหรับติด�
 RTC_DS1307 RTC; //สร้างออปเจค 
 LiquidCrystal lcd(12, 11, 6, 5, 4, 3); // RS, E, D4, D5, D6, D7
 
+//#define Lamp1 //
+#define Fan 1 // กำหนดขาให้ delay พัดลมทำงาน
+
 void setup() {
   
   Serial.begin(9600);
    Wire.begin();
    RTC.begin();
+
+   pinMode(Fan, OUTPUT); //กำหนดให้เป็น Output
   
   dht.setup(2); // กำหนดขาที่ต่อกับ data ของ DHT22 เป็น ขา arduino pin 2
 //-------Time RTC-------
@@ -88,9 +93,9 @@ void loop() {
 
 //---DHT 11
   delay(dht.getMinimumSamplingPeriod());
-  int humidity = dht.getHumidity();  //ดึงค่าความชื้นจาก DHT11 ที่ต้องการ 55 - 65%
+  float humidity = dht.getHumidity() + 5;  //ดึงค่าความชื้นจาก DHT11 ที่ต้องการ 55 - 65%
   float temperature = dht.getTemperature() + 2; //ดึงค่าอุณหภูมิจาก DHT11  ที่ต้องการ  37.5 - 38.0 องศา
-  int fahrenheit = dht.toFahrenheit(temperature);  //แปลงองศาเซลเซียสเป็นฟาเรนไฮน์
+  int fahrenheit = dht.toFahrenheit(temperature) ;  //แปลงองศาเซลเซียสเป็นฟาเรนไฮน์
 //-----DS1307--------------------------- 
 RTC.adjust(DateTime(__DATE__, __TIME__));
  //print Temperature
@@ -107,39 +112,41 @@ RTC.adjust(DateTime(__DATE__, __TIME__));
 //-------Prin LCD-------------------
  lcd.clear();
  //lcd.setCursor(0, 0);
- lcd.home();
- lcd.print("D ");
- lcd.print(now.day(), DEC);
- lcd.print('/');
- lcd.print(now.month(), DEC);
- lcd.print(' ');
+// lcd.home();
+// lcd.print("D ");
+ //lcd.print(now.day(), DEC);
+ ////lcd.print('/');
+ //lcd.print(now.month(), DEC);
+ //lcd.print(' ');
 // lcd.print(now.year());
- lcd.print("T");
- lcd.print(' ');
- lcd.print(now.hour(), DEC);
- lcd.print(':');
- lcd.print(now.minute(), DEC);
- lcd.print(':');
- lcd.print(now.second(), DEC);
+// lcd.print("T");
+// lcd.print(' ');
+/// lcd.print(now.hour(), DEC);
+// lcd.print(':');
+// lcd.print(now.minute(), DEC);
+// lcd.print(':');
+// lcd.print(now.second(), DEC);
  
+ lcd.setCursor(0, 0);
+ lcd.print("Temperature = ");
+ lcd.print(temperature, 2);
+ lcd.print(' ');
  lcd.setCursor(0, 1);
- lcd.print("T=");
- lcd.print(temperature, 1);
- lcd.print(' ');
- lcd.print("H=");
- lcd.print(humidity, 1);
- lcd.print(' ');
- lcd.print("F=");
- lcd.print(fahrenheit);
-
+ lcd.print("Humidity = ");
+ lcd.print(humidity, 2);
+ //lcd.print(' ');
+// lcd.print("F=");
+// lcd.print(fahrenheit);
  delay(500); //หน่วงเวลา 0.5 วินาที
 
- //if(temperature > 25)
- //{
- // lcd.clear();
- // lcd.print("Over Tem");
-  
-// }
-//delay(100);
+//ถ้า อุณหภูมิ อยู่ระหว่าง 39 - 40 ให้พัดลมทำงาน
+if(temperature > 39 && temperature <= 40){
+     delay(1023);
+      if(temperature > 39 && temperature <= 40)
+     {
+      digitalWrite(Fan, HIGH);
+       delay(3000);
+     }
 
+}
 }
